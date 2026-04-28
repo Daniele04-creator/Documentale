@@ -1,0 +1,235 @@
+{
+  "info": {
+    "_postman_id": "1dcd2bcb-0e39-4bd1-a217-c7c0a2fd0185",
+    "name": "Management as Code Documents API",
+    "description": "Collection Postman per il backend prototipale NestJS del modulo documentale.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create manual document",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "const response = pm.response.json();",
+              "if (response.data && response.data.id) {",
+              "  pm.collectionVariables.set('documentId', response.data.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Piano di progetto\",\n  \"description\": \"Documento iniziale del progetto\",\n  \"origin\": \"manual\",\n  \"status\": \"draft\",\n  \"context\": {\n    \"projectId\": \"project-001\",\n    \"phaseId\": \"phase-analisi\",\n    \"substepId\": \"substep-requisiti\",\n    \"wbsElementId\": \"wbs-001\"\n  },\n  \"metadata\": {\n    \"category\": \"planning\",\n    \"owner\": \"Daniele\"\n  },\n  \"fileInfo\": {\n    \"fileName\": \"piano-progetto.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 123456\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documents",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "documents"
+          ]
+        }
+      }
+    },
+    {
+      "name": "List documents",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/documents?page=1&limit=10&projectId=project-001&origin=manual&status=draft&search=piano",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "documents"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "projectId",
+              "value": "project-001"
+            },
+            {
+              "key": "origin",
+              "value": "manual"
+            },
+            {
+              "key": "status",
+              "value": "draft"
+            },
+            {
+              "key": "search",
+              "value": "piano"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get document by id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/documents/{{documentId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "documents",
+            "{{documentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update document",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Piano di progetto aggiornato\",\n  \"status\": \"in_review\",\n  \"metadata\": {\n    \"category\": \"planning\",\n    \"reviewRequired\": true\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documents/{{documentId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "documents",
+            "{{documentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Archive document",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/documents/{{documentId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "documents",
+            "{{documentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Generated intake new document",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Report avanzamento generato\",\n  \"description\": \"Documento generato dal servizio esterno\",\n  \"externalReference\": \"generator-run-001\",\n  \"context\": {\n    \"projectId\": \"project-001\",\n    \"phaseId\": \"phase-esecuzione\",\n    \"wbsElementId\": \"wbs-002\"\n  },\n  \"metadata\": {\n    \"generatedBy\": \"external-generator\",\n    \"templateCode\": \"REPORT_ADV\"\n  },\n  \"fileInfo\": {\n    \"fileName\": \"report-avanzamento.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 456789\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documents/generated-intake",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "documents",
+            "generated-intake"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Generated intake existing document",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"targetDocumentId\": \"{{documentId}}\",\n  \"title\": \"Report avanzamento generato - revisione\",\n  \"description\": \"Nuova versione simulata\",\n  \"externalReference\": \"generator-run-002\",\n  \"context\": {\n    \"projectId\": \"project-001\",\n    \"phaseId\": \"phase-esecuzione\",\n    \"wbsElementId\": \"wbs-002\"\n  },\n  \"metadata\": {\n    \"generatedBy\": \"external-generator\",\n    \"templateCode\": \"REPORT_ADV\",\n    \"revisionReason\": \"Aggiornamento dati progetto\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/documents/generated-intake",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "documents",
+            "generated-intake"
+          ]
+        }
+      }
+    }
+  ]
+}
