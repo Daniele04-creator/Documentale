@@ -101,40 +101,6 @@
         "header": [],
         "url": "{{baseUrl}}/documents/{{documentId}}"
       }
-    },
-    {
-      "name": "Generated intake new document",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Generated progress report\",\n  \"description\": \"Document created by an external service\",\n  \"externalReference\": \"generator-run-001\",\n  \"context\": {\n    \"projectId\": \"project-001\",\n    \"phaseId\": \"phase-execution\",\n    \"wbsElementId\": \"wbs-002\"\n  },\n  \"metadata\": {\n    \"generatedBy\": \"external-generator\",\n    \"templateCode\": \"REPORT_PROGRESS\"\n  },\n  \"fileInfo\": {\n    \"fileName\": \"progress-report.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 456789\n  }\n}"
-        },
-        "url": "{{baseUrl}}/documents/generated-intake"
-      }
-    },
-    {
-      "name": "Generated intake existing document",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"targetDocumentId\": \"{{documentId}}\",\n  \"title\": \"Generated progress report - revision\",\n  \"description\": \"Simulated new version\",\n  \"externalReference\": \"generator-run-002\",\n  \"context\": {\n    \"projectId\": \"project-001\",\n    \"phaseId\": \"phase-execution\",\n    \"wbsElementId\": \"wbs-002\"\n  },\n  \"metadata\": {\n    \"generatedBy\": \"external-generator\",\n    \"templateCode\": \"REPORT_PROGRESS\",\n    \"revisionReason\": \"Updated project data\"\n  }\n}"
-        },
-        "url": "{{baseUrl}}/documents/generated-intake"
-      }
     }
   ]
 }

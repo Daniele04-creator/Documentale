@@ -30,7 +30,6 @@ GET    /documents
 GET    /documents/:id
 PATCH  /documents/:id
 DELETE /documents/:id
-POST   /documents/generated-intake
 ```
 
 ## Not implemented
@@ -43,6 +42,7 @@ POST   /documents/generated-intake
 - File upload or download
 - File storage
 - Document template generation
+- Generated document integration
 - Full document version history
 - Swagger
 - Docker

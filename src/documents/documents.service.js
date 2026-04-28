@@ -138,57 +138,6 @@ export class DocumentsService {
     return archivedDocument;
   }
 
-  async intakeGeneratedDocument(payload) {
-    if (!payload.targetDocumentId) {
-      return this.documentsRepository.create({
-        title: payload.title,
-        description: payload.description,
-        origin: DOCUMENT_ORIGINS.GENERATED,
-        status: DOCUMENT_STATUSES.DRAFT,
-        context: payload.context,
-        metadata: this.withExternalReference(
-          payload.metadata,
-          payload.externalReference,
-        ),
-        fileInfo: payload.fileInfo,
-        version: 1,
-      });
-    }
-
-    const existingDocument = await this.getDocumentById(payload.targetDocumentId);
-    const changes = {
-      title: payload.title,
-      origin: DOCUMENT_ORIGINS.GENERATED,
-      context: payload.context,
-      metadata: this.withExternalReference(
-        payload.metadata,
-        payload.externalReference,
-        existingDocument.metadata,
-      ),
-      version: existingDocument.version + 1,
-      updatedAt: new Date().toISOString(),
-    };
-
-    if (payload.description !== undefined) {
-      changes.description = payload.description;
-    }
-
-    if (payload.fileInfo !== undefined) {
-      changes.fileInfo = payload.fileInfo;
-    }
-
-    const updatedDocument = await this.documentsRepository.update(
-      payload.targetDocumentId,
-      changes,
-    );
-
-    if (!updatedDocument) {
-      throw new NotFoundException(`Document ${payload.targetDocumentId} not found`);
-    }
-
-    return updatedDocument;
-  }
-
   buildUpdateChanges(payload) {
     const changes = {};
 
@@ -217,12 +166,5 @@ export class DocumentsService {
     }
 
     return changes;
-  }
-
-  withExternalReference(metadata, externalReference, fallbackMetadata = {}) {
-    return {
-      ...(metadata || fallbackMetadata),
-      externalReference,
-    };
   }
 }

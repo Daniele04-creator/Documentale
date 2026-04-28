@@ -13,7 +13,6 @@ import {
 import { DocumentsService } from './documents.service';
 import {
   validateCreateDocumentPayload,
-  validateGeneratedDocumentIntakePayload,
   validateListDocumentsQuery,
   validateUpdateDocumentPayload,
 } from './validators/document.validators';
@@ -32,16 +31,6 @@ export class DocumentsController {
 
     return {
       data: await this.documentsService.createDocument(payload),
-    };
-  }
-
-  @Post('generated-intake')
-  @Bind(Body())
-  async intakeGeneratedDocument(body) {
-    const payload = validateGeneratedDocumentIntakePayload(body);
-
-    return {
-      data: await this.documentsService.intakeGeneratedDocument(payload),
     };
   }
 

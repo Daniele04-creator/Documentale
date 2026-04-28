@@ -128,32 +128,6 @@ export function validateListDocumentsQuery(query) {
   };
 }
 
-export function validateGeneratedDocumentIntakePayload(body) {
-  assertPlainObject(body, 'Request body');
-  rejectUnknownFields(body, [
-    'targetDocumentId',
-    'title',
-    'description',
-    'externalReference',
-    'context',
-    'metadata',
-    'fileInfo',
-  ]);
-
-  return {
-    targetDocumentId: optionalNonEmptyString(
-      body.targetDocumentId,
-      'targetDocumentId',
-    ),
-    title: requiredString(body.title, 'title'),
-    description: optionalString(body.description, 'description'),
-    externalReference: requiredString(body.externalReference, 'externalReference'),
-    context: validateContext(body.context),
-    metadata: validateMetadata(body.metadata),
-    fileInfo: validateFileInfo(body.fileInfo),
-  };
-}
-
 function validateContext(context) {
   assertPlainObject(context, 'context');
   rejectUnknownFields(context, CONTEXT_FIELDS, 'context');
