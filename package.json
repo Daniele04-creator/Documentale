@@ -5,11 +5,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && babel src --out-dir dist --copy-files && node -e \"const fs=require('fs'),path=require('path');function walk(dir){if(!fs.existsSync(dir))return;for(const name of fs.readdirSync(dir)){const file=path.join(dir,name);if(fs.statSync(file).isDirectory())walk(file);else if(file.endsWith('.spec.js'))fs.rmSync(file)}}walk('dist')\"",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && babel src --out-dir dist --copy-files",
     "start": "babel-node src/main.js",
     "start:dev": "nodemon",
-    "db:schema": "node scripts/run-schema.js",
-    "test": "jest"
+    "db:schema": "node scripts/run-schema.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.29.2",
@@ -28,24 +27,6 @@
     "@babel/plugin-proposal-decorators": "^7.29.0",
     "@babel/plugin-transform-runtime": "^7.29.0",
     "@babel/preset-env": "^7.29.2",
-    "babel-jest": "^29.7.0",
-    "jest": "^29.7.0",
     "nodemon": "^3.1.14"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.js$",
-    "transform": {
-      "^.+\\.js$": "babel-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.js"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
   }
 }
