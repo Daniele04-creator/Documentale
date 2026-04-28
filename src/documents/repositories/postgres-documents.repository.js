@@ -111,30 +111,34 @@ export class PostgresDocumentsRepository {
   }
 
   async update(id, changes) {
-    const setParts = [];
-    const params = [];
+    const setClauses = [];
+    const values = [];
 
-    addUpdateField(setParts, params, 'title', changes.title);
-    addUpdateField(setParts, params, 'description', changes.description);
-    addUpdateField(setParts, params, 'status', changes.status);
-    addJsonUpdateField(setParts, params, 'context', changes.context);
-    addJsonUpdateField(setParts, params, 'metadata', changes.metadata);
-    addJsonUpdateField(setParts, params, 'file_info', changes.fileInfo);
-    addUpdateField(setParts, params, 'archived_at', changes.archivedAt);
+    addUpdateField(setClauses, values, 'title', changes.title);
+    addUpdateField(setClauses, values, 'description', changes.description);
+    addUpdateField(setClauses, values, 'status', changes.status);
+    addJsonUpdateField(setClauses, values, 'context', changes.context);
+    addJsonUpdateField(setClauses, values, 'metadata', changes.metadata);
+    addJsonUpdateField(setClauses, values, 'file_info', changes.fileInfo);
+    addTimestampUpdateField(setClauses, values, 'archived_at', changes.archivedAt);
 
-    setParts.push(`updated_at = $${params.length + 1}`);
-    params.push(changes.updatedAt || new Date());
+    if (setClauses.length === 0) {
+      return undefined;
+    }
 
-    params.push(id);
+    values.push(changes.updatedAt || new Date().toISOString());
+    setClauses.push(`updated_at = $${values.length}`);
+
+    values.push(id);
 
     const result = await this.databaseService.query(
       `
         UPDATE documents
-        SET ${setParts.join(', ')}
-        WHERE id = $${params.length}
+        SET ${setClauses.join(', ')}
+        WHERE id = $${values.length}
         RETURNING *
       `,
-      params,
+      values,
     );
 
     return result.rows[0] ? mapDocumentRow(result.rows[0]) : undefined;
@@ -173,7 +177,7 @@ function addUpdateField(setParts, params, columnName, value) {
     return;
   }
 
-  params.push(normalizeDateValue(value));
+  params.push(value);
   setParts.push(`${columnName} = $${params.length}`);
 }
 
@@ -186,12 +190,13 @@ function addJsonUpdateField(setParts, params, columnName, value) {
   setParts.push(`${columnName} = $${params.length}::jsonb`);
 }
 
-function normalizeDateValue(value) {
-  if (typeof value === 'string' && value.length > 0) {
-    return new Date(value);
+function addTimestampUpdateField(setParts, params, columnName, value) {
+  if (value === undefined) {
+    return;
   }
 
-  return value;
+  params.push(value);
+  setParts.push(`${columnName} = $${params.length}`);
 }
 
 function mapDocumentRow(row) {

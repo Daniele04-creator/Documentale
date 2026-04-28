@@ -15,6 +15,7 @@ const CONTEXT_FIELDS = [
 ];
 
 const FILE_INFO_FIELDS = ['fileName', 'mimeType', 'sizeBytes', 'checksum'];
+const TITLE_MAX_LENGTH = 200;
 
 export function validateCreateDocumentPayload(body) {
   assertPlainObject(body, 'Request body');
@@ -29,7 +30,7 @@ export function validateCreateDocumentPayload(body) {
   ]);
 
   return {
-    title: requiredString(body.title, 'title'),
+    title: requiredString(body.title, 'title', TITLE_MAX_LENGTH),
     description: optionalString(body.description, 'description'),
     origin: optionalEnum(
       body.origin,
@@ -67,7 +68,7 @@ export function validateUpdateDocumentPayload(body) {
   const payload = {};
 
   if (body.title !== undefined) {
-    payload.title = requiredString(body.title, 'title');
+    payload.title = requiredString(body.title, 'title', TITLE_MAX_LENGTH);
   }
 
   if (body.description !== undefined) {
@@ -192,12 +193,20 @@ function validateFileInfo(fileInfo) {
   return payload;
 }
 
-function requiredString(value, field) {
+function requiredString(value, field, maxLength) {
   if (typeof value !== 'string' || value.trim() === '') {
     throw new BadRequestException(`${field} must be a non-empty string`);
   }
 
-  return value.trim();
+  const trimmedValue = value.trim();
+
+  if (maxLength !== undefined && trimmedValue.length > maxLength) {
+    throw new BadRequestException(
+      `${field} must be less than or equal to ${maxLength} characters`,
+    );
+  }
+
+  return trimmedValue;
 }
 
 function optionalString(value, field) {

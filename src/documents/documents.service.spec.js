@@ -93,6 +93,16 @@ describe('DocumentsService', () => {
     );
   });
 
+  it('throws NotFoundException when updating a missing document', async () => {
+    repository.findById.mockResolvedValue(undefined);
+
+    await expect(
+      service.updateDocument('missing-id', {
+        title: 'Updated project plan',
+      }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
   it('updates a document without incrementing version', async () => {
     const existingDocument = {
       id: 'document-001',
@@ -128,6 +138,7 @@ describe('DocumentsService', () => {
         metadata: {
           reviewRequired: true,
         },
+        updatedAt: expect.any(String),
       }),
     );
     expect(updated.version).toBe(1);
