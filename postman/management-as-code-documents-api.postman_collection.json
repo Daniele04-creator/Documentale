@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "1dcd2bcb-0e39-4bd1-a217-c7c0a2fd0185",
     "name": "Management as Code Documents API",
-    "description": "Postman collection for the JavaScript NestJS documents API prototype.",
+    "description": "Postman collection for the JavaScript NestJS documents API prototype backed by PostgreSQL.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -13,6 +13,16 @@
     },
     {
       "key": "documentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "secondDocumentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "thirdDocumentId",
       "value": "",
       "type": "string"
     }
@@ -27,11 +37,12 @@
       }
     },
     {
-      "name": "Create manual document",
+      "name": "Create document - Project plan",
       "event": [
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
             "exec": [
               "pm.test('status is 201', function () {",
               "  pm.response.to.have.status(201);",
@@ -41,8 +52,7 @@
               "if (response.data && response.data.id) {",
               "  pm.collectionVariables.set('documentId', response.data.id);",
               "}"
-            ],
-            "type": "text/javascript"
+            ]
           }
         }
       ],
@@ -62,11 +72,105 @@
       }
     },
     {
-      "name": "List documents",
+      "name": "Create document - WBS notes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "const response = pm.response.json();",
+              "if (response.data && response.data.id) {",
+              "  pm.collectionVariables.set('secondDocumentId', response.data.id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"WBS structure notes\",\n  \"description\": \"Notes about the first work breakdown structure draft\",\n  \"origin\": \"manual\",\n  \"status\": \"in_review\",\n  \"context\": {\n    \"projectId\": \"project-001\",\n    \"phaseId\": \"phase-planning\",\n    \"wbsElementId\": \"wbs-002\"\n  },\n  \"metadata\": {\n    \"category\": \"wbs\",\n    \"reviewRequired\": true,\n    \"owner\": \"Daniele\"\n  },\n  \"fileInfo\": {\n    \"fileName\": \"wbs-notes.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 180000\n  }\n}"
+        },
+        "url": "{{baseUrl}}/documents"
+      }
+    },
+    {
+      "name": "Create document - Meeting minutes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "const response = pm.response.json();",
+              "if (response.data && response.data.id) {",
+              "  pm.collectionVariables.set('thirdDocumentId', response.data.id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Kickoff meeting minutes\",\n  \"description\": \"Minutes from the project kickoff meeting\",\n  \"origin\": \"manual\",\n  \"status\": \"approved\",\n  \"context\": {\n    \"projectId\": \"project-002\",\n    \"phaseId\": \"phase-kickoff\"\n  },\n  \"metadata\": {\n    \"category\": \"minutes\",\n    \"meetingDate\": \"2026-04-28\",\n    \"participants\": [\"tutor\", \"development-team\", \"Daniele\"]\n  },\n  \"fileInfo\": {\n    \"fileName\": \"kickoff-minutes.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 150000\n  }\n}"
+        },
+        "url": "{{baseUrl}}/documents"
+      }
+    },
+    {
+      "name": "List all documents",
       "request": {
         "method": "GET",
         "header": [],
-        "url": "{{baseUrl}}/documents?page=1&limit=10&projectId=project-001&origin=manual&status=draft&search=plan"
+        "url": "{{baseUrl}}/documents?page=1&limit=10"
+      }
+    },
+    {
+      "name": "List documents by project",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/documents?page=1&limit=10&projectId=project-001"
+      }
+    },
+    {
+      "name": "List documents by status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/documents?page=1&limit=10&status=in_review"
+      }
+    },
+    {
+      "name": "Search documents",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/documents?page=1&limit=10&search=plan"
       }
     },
     {
@@ -100,6 +204,95 @@
         "method": "DELETE",
         "header": [],
         "url": "{{baseUrl}}/documents/{{documentId}}"
+      }
+    },
+    {
+      "name": "Get archived document by id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/documents/{{documentId}}"
+      }
+    },
+    {
+      "name": "Invalid create document - missing title",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"This request is invalid because title is missing\",\n  \"origin\": \"manual\",\n  \"status\": \"draft\",\n  \"context\": {\n    \"projectId\": \"project-001\"\n  }\n}"
+        },
+        "url": "{{baseUrl}}/documents"
+      }
+    },
+    {
+      "name": "Invalid create document - unknown field",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Invalid document\",\n  \"description\": \"This request contains an unknown field\",\n  \"origin\": \"manual\",\n  \"status\": \"draft\",\n  \"context\": {\n    \"projectId\": \"project-001\"\n  },\n  \"unexpectedField\": \"this should not be accepted\"\n}"
+        },
+        "url": "{{baseUrl}}/documents"
+      }
+    },
+    {
+      "name": "Get missing document",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', function () {",
+              "  pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/documents/not-existing-document-id"
       }
     }
   ]

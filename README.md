@@ -11,7 +11,8 @@ The goal is to test the backend API with Postman before building any frontend.
 - JavaScript
 - Babel for decorators
 - Jest
-- In-memory storage
+- PostgreSQL
+- JSONB for flexible document data
 
 ## Implemented APIs
 
@@ -36,8 +37,6 @@ DELETE /documents/:id
 
 - Frontend
 - Authentication or authorization
-- Database
-- PostgreSQL or JSONB
 - ORM or migrations
 - File upload or download
 - File storage
@@ -52,6 +51,36 @@ DELETE /documents/:id
 ```bash
 npm install
 ```
+
+## PostgreSQL setup
+
+Create the database manually:
+
+```sql
+CREATE DATABASE documentale;
+```
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Update `.env` if your PostgreSQL user, password, host, port, or database name are different.
+
+Run the schema setup:
+
+```bash
+npm run db:schema
+```
+
+The documents table stores `context`, `metadata`, and `fileInfo` as JSONB fields. This is still a prototype, so there is no ORM or migration framework yet.
 
 ## Run
 
@@ -93,6 +122,10 @@ baseUrl = http://localhost:3000/api/v1
 
 Run `Create manual document` before requests that use `documentId`.
 
+## Manual testing
+
+Use the Postman collection for API testing. Data is now persisted in PostgreSQL, so documents remain available after an API restart.
+
 ## Data storage
 
-Data is stored only in memory. If the server restarts, all documents are lost.
+Data is stored in PostgreSQL. JSONB is used for `context`, `metadata`, and `fileInfo`.

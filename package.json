@@ -8,13 +8,16 @@
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && babel src --out-dir dist --copy-files && node -e \"const fs=require('fs'),path=require('path');function walk(dir){if(!fs.existsSync(dir))return;for(const name of fs.readdirSync(dir)){const file=path.join(dir,name);if(fs.statSync(file).isDirectory())walk(file);else if(file.endsWith('.spec.js'))fs.rmSync(file)}}walk('dist')\"",
     "start": "babel-node src/main.js",
     "start:dev": "nodemon",
+    "db:schema": "node scripts/run-schema.js",
     "test": "jest"
   },
   "dependencies": {
+    "@babel/runtime": "^7.29.2",
     "@nestjs/common": "^11.1.19",
     "@nestjs/core": "^11.1.19",
     "@nestjs/platform-express": "^11.1.19",
-    "@babel/runtime": "^7.29.2",
+    "dotenv": "^17.4.2",
+    "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },

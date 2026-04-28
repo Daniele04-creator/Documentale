@@ -3,10 +3,10 @@ import {
   DOCUMENT_ORIGINS,
   DOCUMENT_STATUSES,
 } from './models/document.constants';
-import { InMemoryDocumentsRepository } from './repositories/in-memory-documents.repository';
+import { PostgresDocumentsRepository } from './repositories/postgres-documents.repository';
 
 @Injectable()
-@Dependencies(InMemoryDocumentsRepository)
+@Dependencies(PostgresDocumentsRepository)
 export class DocumentsService {
   constructor(documentsRepository) {
     this.documentsRepository = documentsRepository;
@@ -26,74 +26,7 @@ export class DocumentsService {
   }
 
   async listDocuments(query) {
-    const page = query.page || 1;
-    const limit = query.limit || 10;
-    const search = query.search ? query.search.trim().toLowerCase() : undefined;
-
-    let documents = await this.documentsRepository.findAll();
-
-    documents = documents.filter((document) => {
-      if (search) {
-        const searchableText = `${document.title} ${document.description || ''}`
-          .toLowerCase()
-          .trim();
-
-        if (!searchableText.includes(search)) {
-          return false;
-        }
-      }
-
-      if (query.projectId && document.context.projectId !== query.projectId) {
-        return false;
-      }
-
-      if (query.phaseId && document.context.phaseId !== query.phaseId) {
-        return false;
-      }
-
-      if (query.substepId && document.context.substepId !== query.substepId) {
-        return false;
-      }
-
-      if (
-        query.wbsElementId &&
-        document.context.wbsElementId !== query.wbsElementId
-      ) {
-        return false;
-      }
-
-      if (query.taskId && document.context.taskId !== query.taskId) {
-        return false;
-      }
-
-      if (query.origin && document.origin !== query.origin) {
-        return false;
-      }
-
-      if (query.status && document.status !== query.status) {
-        return false;
-      }
-
-      return true;
-    });
-
-    documents.sort((first, second) =>
-      second.updatedAt.localeCompare(first.updatedAt),
-    );
-
-    const total = documents.length;
-    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
-    const startIndex = (page - 1) * limit;
-
-    return {
-      data: documents.slice(startIndex, startIndex + limit),
-      meta: {
-        page,
-        limit,
-        total,
-        totalPages,
-      },
-    };
+    return this.documentsRepository.findAll(query);
   }
 
   async getDocumentById(id) {
