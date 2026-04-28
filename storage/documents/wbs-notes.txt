@@ -1,0 +1,4 @@
+WBS structure notes
+
+This sample file contains notes about the first work breakdown structure draft.
+It is stored locally for manual API testing.

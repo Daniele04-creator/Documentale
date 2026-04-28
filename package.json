@@ -8,7 +8,8 @@
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && babel src --out-dir dist --copy-files",
     "start": "babel-node src/main.js",
     "start:dev": "nodemon",
-    "db:schema": "node scripts/run-schema.js"
+    "db:schema": "node scripts/run-schema.js",
+    "db:seed": "node scripts/run-seed.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.29.2",

@@ -7,6 +7,8 @@ Rules:
 - Backend only. Do not add a frontend here.
 - PostgreSQL is used for persistence.
 - `context`, `metadata`, and `fileInfo` are stored as JSONB.
+- Document records are seeded for local testing. Do not add a public create-document API unless asked.
+- Physical sample files live under `storage/documents`.
 - Write code and repository text in English.
 - Keep controllers thin.
 - Keep services simple.

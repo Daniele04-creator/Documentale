@@ -7,12 +7,11 @@ import {
   Get,
   Param,
   Patch,
-  Post,
   Query,
+  Res,
 } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import {
-  validateCreateDocumentPayload,
   validateListDocumentsQuery,
   validateUpdateDocumentPayload,
 } from './validators/document.validators';
@@ -24,20 +23,19 @@ export class DocumentsController {
     this.documentsService = documentsService;
   }
 
-  @Post()
-  @Bind(Body())
-  async createDocument(body) {
-    const payload = validateCreateDocumentPayload(body);
-
-    return {
-      data: await this.documentsService.createDocument(payload),
-    };
-  }
-
   @Get()
   @Bind(Query())
   async listDocuments(query) {
     return this.documentsService.listDocuments(validateListDocumentsQuery(query));
+  }
+
+  @Get(':id/file')
+  @Bind(Param('id'), Res())
+  async downloadDocumentFile(id, response) {
+    const file = await this.documentsService.getDocumentFile(id);
+
+    response.setHeader('Content-Type', file.mimeType);
+    return response.download(file.absolutePath, file.fileName);
   }
 
   @Get(':id')

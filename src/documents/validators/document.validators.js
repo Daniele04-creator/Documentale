@@ -1,8 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import {
-  DOCUMENT_STATUS_VALUES,
-  DOCUMENT_STATUSES,
-} from '../models/document.constants';
+import { DOCUMENT_STATUS_VALUES } from '../models/document.constants';
 
 const CONTEXT_FIELDS = [
   'projectId',
@@ -12,34 +9,14 @@ const CONTEXT_FIELDS = [
   'taskId',
 ];
 
-const FILE_INFO_FIELDS = ['fileName', 'mimeType', 'sizeBytes', 'checksum'];
+const FILE_INFO_FIELDS = [
+  'fileName',
+  'mimeType',
+  'sizeBytes',
+  'checksum',
+  'storagePath',
+];
 const TITLE_MAX_LENGTH = 200;
-
-export function validateCreateDocumentPayload(body) {
-  assertPlainObject(body, 'Request body');
-  rejectUnknownFields(body, [
-    'title',
-    'description',
-    'status',
-    'context',
-    'metadata',
-    'fileInfo',
-  ]);
-
-  return {
-    title: requiredString(body.title, 'title', TITLE_MAX_LENGTH),
-    description: optionalString(body.description, 'description'),
-    status: optionalEnum(
-      body.status,
-      DOCUMENT_STATUS_VALUES,
-      'status',
-      DOCUMENT_STATUSES.DRAFT,
-    ),
-    context: validateContext(body.context),
-    metadata: validateMetadata(body.metadata),
-    fileInfo: validateFileInfo(body.fileInfo),
-  };
-}
 
 export function validateUpdateDocumentPayload(body) {
   assertPlainObject(body, 'Request body');
@@ -180,6 +157,10 @@ function validateFileInfo(fileInfo) {
     payload.checksum = optionalNonEmptyString(fileInfo.checksum, 'fileInfo.checksum');
   }
 
+  if (fileInfo.storagePath !== undefined) {
+    payload.storagePath = optionalNonEmptyString(fileInfo.storagePath, 'fileInfo.storagePath');
+  }
+
   return payload;
 }
 
@@ -249,14 +230,6 @@ function requiredEnum(value, allowedValues, field) {
   }
 
   return value;
-}
-
-function optionalEnum(value, allowedValues, field, defaultValue) {
-  if (value === undefined) {
-    return defaultValue;
-  }
-
-  return requiredEnum(value, allowedValues, field);
 }
 
 function assertPlainObject(value, label) {

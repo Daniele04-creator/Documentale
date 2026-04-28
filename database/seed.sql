@@ -1,0 +1,90 @@
+INSERT INTO documents (
+  id,
+  title,
+  description,
+  status,
+  context,
+  metadata,
+  file_info,
+  version,
+  created_at,
+  updated_at,
+  archived_at
+)
+VALUES
+(
+  '11111111-1111-4111-8111-111111111111',
+  'Project plan',
+  'Initial project planning document',
+  'draft',
+  '{"projectId":"project-001","phaseId":"phase-analysis","substepId":"substep-requirements","wbsElementId":"wbs-001","taskId":"task-001"}'::jsonb,
+  '{"category":"planning","owner":"Daniele","priority":"high"}'::jsonb,
+  '{"fileName":"project-plan.txt","mimeType":"text/plain","sizeBytes":160,"storagePath":"storage/documents/project-plan.txt"}'::jsonb,
+  1,
+  now(),
+  NULL,
+  NULL
+),
+(
+  '22222222-2222-4222-8222-222222222222',
+  'WBS structure notes',
+  'Notes about the first work breakdown structure draft',
+  'in_review',
+  '{"projectId":"project-001","phaseId":"phase-planning","substepId":"substep-wbs","wbsElementId":"wbs-002","taskId":"task-002"}'::jsonb,
+  '{"category":"wbs","reviewRequired":true,"owner":"Daniele"}'::jsonb,
+  '{"fileName":"wbs-notes.txt","mimeType":"text/plain","sizeBytes":150,"storagePath":"storage/documents/wbs-notes.txt"}'::jsonb,
+  1,
+  now(),
+  NULL,
+  NULL
+),
+(
+  '33333333-3333-4333-8333-333333333333',
+  'Requirements analysis draft',
+  'Draft document with initial requirements for the document module',
+  'draft',
+  '{"projectId":"project-001","phaseId":"phase-analysis","substepId":"substep-requirements","wbsElementId":"wbs-003","taskId":"task-003"}'::jsonb,
+  '{"category":"requirements","relatedModule":"documents","versionLabel":"draft-1"}'::jsonb,
+  '{"fileName":"requirements-analysis.txt","mimeType":"text/plain","sizeBytes":170,"storagePath":"storage/documents/requirements-analysis.txt"}'::jsonb,
+  1,
+  now(),
+  NULL,
+  NULL
+),
+(
+  '44444444-4444-4444-8444-444444444444',
+  'Kickoff meeting minutes',
+  'Minutes from the project kickoff meeting',
+  'approved',
+  '{"projectId":"project-002","phaseId":"phase-kickoff","substepId":"substep-meeting","taskId":"task-004"}'::jsonb,
+  '{"category":"minutes","meetingDate":"2026-04-28","participants":["tutor","development-team","Daniele"]}'::jsonb,
+  '{"fileName":"kickoff-minutes.txt","mimeType":"text/plain","sizeBytes":145,"storagePath":"storage/documents/kickoff-minutes.txt"}'::jsonb,
+  1,
+  now(),
+  NULL,
+  NULL
+),
+(
+  '55555555-5555-4555-8555-555555555555',
+  'Document home mockup notes',
+  'Notes for the first Figma mockup of the document home page',
+  'draft',
+  '{"projectId":"project-003","phaseId":"phase-ui","substepId":"substep-mockup","taskId":"task-document-home"}'::jsonb,
+  '{"category":"ui","tool":"figma","screen":"document-home"}'::jsonb,
+  '{"fileName":"document-home-notes.txt","mimeType":"text/plain","sizeBytes":155,"storagePath":"storage/documents/document-home-notes.txt"}'::jsonb,
+  1,
+  now(),
+  NULL,
+  NULL
+)
+ON CONFLICT (id) DO UPDATE SET
+  title = EXCLUDED.title,
+  description = EXCLUDED.description,
+  status = EXCLUDED.status,
+  context = EXCLUDED.context,
+  metadata = EXCLUDED.metadata,
+  file_info = EXCLUDED.file_info,
+  version = EXCLUDED.version,
+  created_at = EXCLUDED.created_at,
+  updated_at = EXCLUDED.updated_at,
+  archived_at = EXCLUDED.archived_at;

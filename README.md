@@ -2,6 +2,8 @@
 
 JavaScript NestJS prototype for the document management API.
 
+This module does not generate documents. It reads document records from PostgreSQL and opens local files that already exist under `storage/documents`.
+
 ## Stack
 
 - Node.js
@@ -14,22 +16,29 @@ JavaScript NestJS prototype for the document management API.
 ## Implemented
 
 - Health check
-- Create document
-- List documents
-- Get document by id
-- Update document
-- Archive document
+- List existing documents
+- Search and filter documents
+- Get document metadata by id
+- Download the local document file
+- Update document metadata, context, fileInfo, and status
+- Archive a document record
 
 ## Not implemented
 
 - Frontend
 - Authentication or authorization
-- Upload or download
+- Upload
 - Document generation
 - ORM
 - Swagger
 
 ## Setup
+
+Install dependencies:
+
+```powershell
+npm install
+```
 
 Copy the environment example:
 
@@ -43,30 +52,16 @@ Create the PostgreSQL database:
 CREATE DATABASE documentale;
 ```
 
-Install dependencies:
-
-```powershell
-npm install
-```
-
 Create the table and indexes:
 
 ```powershell
 npm run db:schema
 ```
 
-If you already have an older prototype database with the `origin` column, either recreate the database or run:
+Insert sample documents for local testing:
 
-```sql
-ALTER TABLE documents DROP COLUMN IF EXISTS origin;
-DROP INDEX IF EXISTS idx_documents_origin;
-```
-
-If you already have a prototype database where `updated_at` is required on creation, run:
-
-```sql
-ALTER TABLE documents ALTER COLUMN updated_at DROP NOT NULL;
-UPDATE documents SET updated_at = NULL WHERE updated_at = created_at;
+```powershell
+npm run db:seed
 ```
 
 Start the API:
@@ -87,21 +82,31 @@ Use the Postman collection in the `postman` folder.
 
 Recommended order:
 
-1. Create the sample documents.
-2. List all documents.
-3. Try the search and JSONB filters.
-4. Get a document by id.
-5. Update a document and check that `version` increases.
-6. Archive a document.
+1. Run `npm run db:schema`.
+2. Run `npm run db:seed`.
+3. Start the API.
+4. List documents.
+5. Get a document by id.
+6. Download the document file.
+7. Update metadata or status and check that `version` increases.
+8. Archive a document.
 
-Data is persisted in PostgreSQL. `context`, `metadata`, and `fileInfo` are stored as JSONB.
+## Notes
 
-`createdAt` is set when the document is created. `updatedAt` is `null` until the first real update. `version` starts at 1 and increments on PATCH updates.
+- Documents are persisted in PostgreSQL.
+- `context`, `metadata`, and `fileInfo` are stored as JSONB.
+- `fileInfo.storagePath` points to a local file under `storage/documents`.
+- `GET /documents/:id/file` downloads the physical file.
+- `PATCH /documents/:id` updates the database record only. It does not change file content.
+- `DELETE /documents/:id` archives the database record only. It does not delete the file.
+- `createdAt` is set when the document is inserted.
+- `updatedAt` is `null` until the first update.
+- `version` starts at 1 and increments on PATCH updates.
 
-## Search and JSONB filters
+## Search and Filters
 
 `search` filters `title` and `description`.
 
 `projectId`, `phaseId`, `substepId`, `wbsElementId`, and `taskId` are read from the `context` JSONB field.
 
-`metadata` and `fileInfo` are stored as JSONB but are not currently used for filtering. `status` is a normal database column.
+`status` is a normal database column.

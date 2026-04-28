@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "1dcd2bcb-0e39-4bd1-a217-c7c0a2fd0185",
     "name": "Management as Code Documents API",
-    "description": "Postman collection for the JavaScript NestJS documents API prototype backed by PostgreSQL and JSONB filters.",
+    "description": "Postman collection for manually testing existing document records, JSONB filters, metadata updates, archiving, and local file download.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -13,27 +13,7 @@
     },
     {
       "key": "documentId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "secondDocumentId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "thirdDocumentId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "fourthDocumentId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "fifthDocumentId",
-      "value": "",
+      "value": "11111111-1111-4111-8111-111111111111",
       "type": "string"
     }
   ],
@@ -47,182 +27,7 @@
       }
     },
     {
-      "name": "02 Create document - Project plan",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 201', function () {",
-              "  pm.response.to.have.status(201);",
-              "});",
-              "",
-              "const response = pm.response.json();",
-              "if (response.data && response.data.id) {",
-              "  pm.collectionVariables.set('documentId', response.data.id);",
-              "}"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Project plan\",\n  \"description\": \"Initial project planning document\",\n  \"status\": \"draft\",\n  \"context\": {\n    \"projectId\": \"project-001\",\n    \"phaseId\": \"phase-analysis\",\n    \"substepId\": \"substep-requirements\",\n    \"wbsElementId\": \"wbs-001\",\n    \"taskId\": \"task-001\"\n  },\n  \"metadata\": {\n    \"category\": \"planning\",\n    \"owner\": \"Daniele\",\n    \"priority\": \"high\"\n  },\n  \"fileInfo\": {\n    \"fileName\": \"project-plan.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 123456\n  }\n}"
-        },
-        "url": "{{baseUrl}}/documents"
-      }
-    },
-    {
-      "name": "03 Create document - WBS structure notes",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 201', function () {",
-              "  pm.response.to.have.status(201);",
-              "});",
-              "",
-              "const response = pm.response.json();",
-              "if (response.data && response.data.id) {",
-              "  pm.collectionVariables.set('secondDocumentId', response.data.id);",
-              "}"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"WBS structure notes\",\n  \"description\": \"Notes about the first work breakdown structure draft\",\n  \"status\": \"in_review\",\n  \"context\": {\n    \"projectId\": \"project-001\",\n    \"phaseId\": \"phase-planning\",\n    \"substepId\": \"substep-wbs\",\n    \"wbsElementId\": \"wbs-002\",\n    \"taskId\": \"task-002\"\n  },\n  \"metadata\": {\n    \"category\": \"wbs\",\n    \"reviewRequired\": true,\n    \"owner\": \"Daniele\"\n  },\n  \"fileInfo\": {\n    \"fileName\": \"wbs-notes.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 180000\n  }\n}"
-        },
-        "url": "{{baseUrl}}/documents"
-      }
-    },
-    {
-      "name": "04 Create document - Requirements analysis draft",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 201', function () {",
-              "  pm.response.to.have.status(201);",
-              "});",
-              "",
-              "const response = pm.response.json();",
-              "if (response.data && response.data.id) {",
-              "  pm.collectionVariables.set('thirdDocumentId', response.data.id);",
-              "}"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Requirements analysis draft\",\n  \"description\": \"Draft document with initial requirements for the document module\",\n  \"status\": \"draft\",\n  \"context\": {\n    \"projectId\": \"project-001\",\n    \"phaseId\": \"phase-analysis\",\n    \"substepId\": \"substep-requirements\",\n    \"wbsElementId\": \"wbs-003\",\n    \"taskId\": \"task-003\"\n  },\n  \"metadata\": {\n    \"category\": \"requirements\",\n    \"relatedModule\": \"documents\",\n    \"versionLabel\": \"draft-1\"\n  },\n  \"fileInfo\": {\n    \"fileName\": \"requirements-analysis-draft.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 320000\n  }\n}"
-        },
-        "url": "{{baseUrl}}/documents"
-      }
-    },
-    {
-      "name": "05 Create document - Kickoff meeting minutes",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 201', function () {",
-              "  pm.response.to.have.status(201);",
-              "});",
-              "",
-              "const response = pm.response.json();",
-              "if (response.data && response.data.id) {",
-              "  pm.collectionVariables.set('fourthDocumentId', response.data.id);",
-              "}"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Kickoff meeting minutes\",\n  \"description\": \"Minutes from the project kickoff meeting\",\n  \"status\": \"approved\",\n  \"context\": {\n    \"projectId\": \"project-002\",\n    \"phaseId\": \"phase-kickoff\",\n    \"substepId\": \"substep-meeting\",\n    \"taskId\": \"task-004\"\n  },\n  \"metadata\": {\n    \"category\": \"minutes\",\n    \"meetingDate\": \"2026-04-28\",\n    \"participants\": [\"tutor\", \"development-team\", \"Daniele\"]\n  },\n  \"fileInfo\": {\n    \"fileName\": \"kickoff-minutes.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 150000\n  }\n}"
-        },
-        "url": "{{baseUrl}}/documents"
-      }
-    },
-    {
-      "name": "06 Create document - Document home mockup notes",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 201', function () {",
-              "  pm.response.to.have.status(201);",
-              "});",
-              "",
-              "const response = pm.response.json();",
-              "if (response.data && response.data.id) {",
-              "  pm.collectionVariables.set('fifthDocumentId', response.data.id);",
-              "}"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Document home mockup notes\",\n  \"description\": \"Notes for the first Figma mockup of the document home page\",\n  \"status\": \"draft\",\n  \"context\": {\n    \"projectId\": \"project-003\",\n    \"phaseId\": \"phase-ui\",\n    \"substepId\": \"substep-mockup\",\n    \"taskId\": \"task-document-home\"\n  },\n  \"metadata\": {\n    \"category\": \"ui\",\n    \"tool\": \"figma\",\n    \"screen\": \"document-home\"\n  },\n  \"fileInfo\": {\n    \"fileName\": \"document-home-mockup-notes.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 95000\n  }\n}"
-        },
-        "url": "{{baseUrl}}/documents"
-      }
-    },
-    {
-      "name": "07 List all documents",
+      "name": "02 List all documents",
       "request": {
         "method": "GET",
         "header": [],
@@ -230,7 +35,7 @@
       }
     },
     {
-      "name": "08 Search documents by text",
+      "name": "03 Search documents",
       "request": {
         "method": "GET",
         "header": [],
@@ -238,7 +43,7 @@
       }
     },
     {
-      "name": "09 Filter by projectId from context JSONB",
+      "name": "04 Filter by projectId from context JSONB",
       "request": {
         "method": "GET",
         "header": [],
@@ -246,7 +51,7 @@
       }
     },
     {
-      "name": "10 Filter by phaseId from context JSONB",
+      "name": "05 Filter by phaseId from context JSONB",
       "request": {
         "method": "GET",
         "header": [],
@@ -254,7 +59,7 @@
       }
     },
     {
-      "name": "11 Filter by substepId from context JSONB",
+      "name": "06 Filter by substepId from context JSONB",
       "request": {
         "method": "GET",
         "header": [],
@@ -262,7 +67,7 @@
       }
     },
     {
-      "name": "12 Filter by wbsElementId from context JSONB",
+      "name": "07 Filter by wbsElementId from context JSONB",
       "request": {
         "method": "GET",
         "header": [],
@@ -270,7 +75,7 @@
       }
     },
     {
-      "name": "13 Filter by taskId from context JSONB",
+      "name": "08 Filter by taskId from context JSONB",
       "request": {
         "method": "GET",
         "header": [],
@@ -278,44 +83,15 @@
       }
     },
     {
-      "name": "14 Filter by status",
+      "name": "09 Filter by status",
       "request": {
         "method": "GET",
         "header": [],
-        "url": "{{baseUrl}}/documents?status=in_review"
+        "url": "{{baseUrl}}/documents?status=draft"
       }
     },
     {
-      "name": "15 Combined filter - projectId and status",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{baseUrl}}/documents?projectId=project-001&status=draft"
-      }
-    },
-    {
-      "name": "16 Invalid list documents - removed origin filter",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 400', function () {",
-              "  pm.response.to.have.status(400);",
-              "});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{baseUrl}}/documents?origin=manual"
-      }
-    },
-    {
-      "name": "17 Get document by id",
+      "name": "10 Get document by id",
       "request": {
         "method": "GET",
         "header": [],
@@ -323,7 +99,15 @@
       }
     },
     {
-      "name": "18 Update document",
+      "name": "11 Download document file",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/documents/{{documentId}}/file"
+      }
+    },
+    {
+      "name": "12 Update document metadata",
       "request": {
         "method": "PATCH",
         "header": [
@@ -334,21 +118,13 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"title\": \"Updated project plan\",\n  \"status\": \"in_review\",\n  \"metadata\": {\n    \"category\": \"planning\",\n    \"reviewRequired\": true\n  }\n}"
+          "raw": "{\n  \"status\": \"in_review\",\n  \"metadata\": {\n    \"category\": \"planning\",\n    \"reviewRequired\": true\n  }\n}"
         },
         "url": "{{baseUrl}}/documents/{{documentId}}"
       }
     },
     {
-      "name": "19 Archive document",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": "{{baseUrl}}/documents/{{documentId}}"
-      }
-    },
-    {
-      "name": "20 Get archived document by id",
+      "name": "13 Get document by id after update",
       "request": {
         "method": "GET",
         "header": [],
@@ -356,7 +132,15 @@
       }
     },
     {
-      "name": "21 Invalid create document - missing title",
+      "name": "14 Archive document",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/documents/{{documentId}}"
+      }
+    },
+    {
+      "name": "15 Invalid id",
       "event": [
         {
           "listen": "test",
@@ -371,52 +155,13 @@
         }
       ],
       "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"description\": \"This request is invalid because title is missing\",\n  \"status\": \"draft\",\n  \"context\": {\n    \"projectId\": \"project-001\"\n  }\n}"
-        },
-        "url": "{{baseUrl}}/documents"
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/documents/not-existing-document-id"
       }
     },
     {
-      "name": "22 Invalid create document - unknown field",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 400', function () {",
-              "  pm.response.to.have.status(400);",
-              "});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Invalid document\",\n  \"description\": \"This request contains an unknown field\",\n  \"status\": \"draft\",\n  \"context\": {\n    \"projectId\": \"project-001\"\n  },\n  \"unexpectedField\": \"this should not be accepted\"\n}"
-        },
-        "url": "{{baseUrl}}/documents"
-      }
-    },
-    {
-      "name": "23 Get missing document",
+      "name": "16 Missing valid UUID",
       "event": [
         {
           "listen": "test",
@@ -434,78 +179,6 @@
         "method": "GET",
         "header": [],
         "url": "{{baseUrl}}/documents/00000000-0000-0000-0000-000000000000"
-      }
-    },
-    {
-      "name": "24 Get document with invalid id",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 400', function () {",
-              "  pm.response.to.have.status(400);",
-              "});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{baseUrl}}/documents/not-existing-document-id"
-      }
-    },
-    {
-      "name": "25 Update document with invalid id",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 400', function () {",
-              "  pm.response.to.have.status(400);",
-              "});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Invalid id update\"\n}"
-        },
-        "url": "{{baseUrl}}/documents/not-existing-document-id"
-      }
-    },
-    {
-      "name": "26 Archive document with invalid id",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('status is 400', function () {",
-              "  pm.response.to.have.status(400);",
-              "});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": "{{baseUrl}}/documents/not-existing-document-id"
       }
     }
   ]

@@ -1,0 +1,3 @@
+Kickoff meeting minutes
+
+This sample file represents meeting notes that already exist in local storage.

@@ -1,5 +1,4 @@
 import { Dependencies, Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { DatabaseService } from '../../database/database.service';
 
 @Injectable()
@@ -7,42 +6,6 @@ import { DatabaseService } from '../../database/database.service';
 export class PostgresDocumentsRepository {
   constructor(databaseService) {
     this.databaseService = databaseService;
-  }
-
-  async create(document) {
-    const id = randomUUID();
-    const now = new Date();
-
-    const result = await this.databaseService.query(
-      `
-        INSERT INTO documents (
-          id,
-          title,
-          description,
-          status,
-          context,
-          metadata,
-          file_info,
-          version,
-          created_at
-        )
-        VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, $8, $9)
-        RETURNING *
-      `,
-      [
-        id,
-        document.title,
-        document.description || null,
-        document.status,
-        JSON.stringify(document.context || {}),
-        JSON.stringify(document.metadata || {}),
-        document.fileInfo === undefined ? null : JSON.stringify(document.fileInfo),
-        document.version || 1,
-        now,
-      ],
-    );
-
-    return mapDocumentRow(result.rows[0]);
   }
 
   async findAll(filters) {

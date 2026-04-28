@@ -1,25 +1,22 @@
-import { Dependencies, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Dependencies,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import fs from 'fs/promises';
+import path from 'path';
 import { DOCUMENT_STATUSES } from './models/document.constants';
 import { PostgresDocumentsRepository } from './repositories/postgres-documents.repository';
 import { validateDocumentId } from './validators/document.validators';
+
+const STORAGE_ROOT = path.resolve(process.cwd(), 'storage', 'documents');
 
 @Injectable()
 @Dependencies(PostgresDocumentsRepository)
 export class DocumentsService {
   constructor(documentsRepository) {
     this.documentsRepository = documentsRepository;
-  }
-
-  async createDocument(payload) {
-    return this.documentsRepository.create({
-      title: payload.title,
-      description: payload.description,
-      status: payload.status || DOCUMENT_STATUSES.DRAFT,
-      context: payload.context,
-      metadata: payload.metadata || {},
-      fileInfo: payload.fileInfo,
-      version: 1,
-    });
   }
 
   async listDocuments(query) {
@@ -36,6 +33,28 @@ export class DocumentsService {
     }
 
     return document;
+  }
+
+  async getDocumentFile(id) {
+    const document = await this.getDocumentById(id);
+    const fileInfo = document.fileInfo || {};
+
+    if (!fileInfo.storagePath) {
+      throw new NotFoundException(`Document ${id} does not have a file path`);
+    }
+
+    const absolutePath = resolveStoragePath(fileInfo.storagePath);
+    const fileExists = await isExistingFile(absolutePath);
+
+    if (!fileExists) {
+      throw new NotFoundException(`Document file not found for ${id}`);
+    }
+
+    return {
+      absolutePath,
+      fileName: fileInfo.fileName || path.basename(absolutePath),
+      mimeType: fileInfo.mimeType || 'application/octet-stream',
+    };
   }
 
   async updateDocument(id, payload) {
@@ -95,9 +114,43 @@ export class DocumentsService {
     }
 
     if (payload.fileInfo !== undefined) {
+      if (payload.fileInfo.storagePath !== undefined) {
+        resolveStoragePath(payload.fileInfo.storagePath);
+      }
+
       changes.fileInfo = payload.fileInfo;
     }
 
     return changes;
+  }
+}
+
+function resolveStoragePath(storagePath) {
+  const absolutePath = path.resolve(process.cwd(), storagePath);
+
+  if (!isInsideStorageRoot(absolutePath)) {
+    throw new BadRequestException(
+      'fileInfo.storagePath must be inside storage/documents',
+    );
+  }
+
+  return absolutePath;
+}
+
+function isInsideStorageRoot(absolutePath) {
+  const relativePath = path.relative(STORAGE_ROOT, absolutePath);
+
+  return (
+    relativePath === '' ||
+    (!relativePath.startsWith('..') && !path.isAbsolute(relativePath))
+  );
+}
+
+async function isExistingFile(absolutePath) {
+  try {
+    const fileStats = await fs.stat(absolutePath);
+    return fileStats.isFile();
+  } catch {
+    return false;
   }
 }

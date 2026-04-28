@@ -1,0 +1,4 @@
+Project plan
+
+This is a local sample document used by the documents API prototype.
+It represents a project planning file that already exists on disk.

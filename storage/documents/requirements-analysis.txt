@@ -1,0 +1,3 @@
+Requirements analysis draft
+
+This sample file represents an early requirements document for the document management module.
