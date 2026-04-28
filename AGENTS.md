@@ -5,10 +5,12 @@ This repository is a JavaScript NestJS backend prototype for the Management as C
 Rules:
 
 - Backend only. Do not add a frontend here.
-- No database yet. Keep data in memory.
+- PostgreSQL is used for persistence.
+- `context`, `metadata`, and `fileInfo` are stored as JSONB.
 - Write code and repository text in English.
 - Keep controllers thin.
 - Keep services simple.
 - Keep validation simple and easy to read.
-- Do not add ORM, migrations, upload, download, auth, Swagger, Docker, or document generation unless asked.
-- After changes, run `npm run build` and `npm test`.
+- Do not add an ORM, frontend, upload, download, auth, Swagger, Docker, or document generation unless asked.
+- After code changes, run `npm run build`.
+- Use the Postman collection for manual API checks.

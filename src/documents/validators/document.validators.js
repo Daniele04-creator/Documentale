@@ -1,7 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
 import {
-  DOCUMENT_ORIGIN_VALUES,
-  DOCUMENT_ORIGINS,
   DOCUMENT_STATUS_VALUES,
   DOCUMENT_STATUSES,
 } from '../models/document.constants';
@@ -22,7 +20,6 @@ export function validateCreateDocumentPayload(body) {
   rejectUnknownFields(body, [
     'title',
     'description',
-    'origin',
     'status',
     'context',
     'metadata',
@@ -32,12 +29,6 @@ export function validateCreateDocumentPayload(body) {
   return {
     title: requiredString(body.title, 'title', TITLE_MAX_LENGTH),
     description: optionalString(body.description, 'description'),
-    origin: optionalEnum(
-      body.origin,
-      DOCUMENT_ORIGIN_VALUES,
-      'origin',
-      DOCUMENT_ORIGINS.MANUAL,
-    ),
     status: optionalEnum(
       body.status,
       DOCUMENT_STATUS_VALUES,
@@ -97,36 +88,35 @@ export function validateUpdateDocumentPayload(body) {
 export function validateListDocumentsQuery(query) {
   assertPlainObject(query, 'Query string');
   rejectUnknownFields(query, [
-    'page',
-    'limit',
     'search',
     'projectId',
     'phaseId',
     'substepId',
     'wbsElementId',
     'taskId',
-    'origin',
     'status',
   ]);
 
   return {
-    page: optionalPositiveInteger(query.page, 'page', 1),
-    limit: optionalPositiveInteger(query.limit, 'limit', 10, 100),
     search: optionalQueryString(query.search, 'search', true),
     projectId: optionalQueryString(query.projectId, 'projectId'),
     phaseId: optionalQueryString(query.phaseId, 'phaseId'),
     substepId: optionalQueryString(query.substepId, 'substepId'),
     wbsElementId: optionalQueryString(query.wbsElementId, 'wbsElementId'),
     taskId: optionalQueryString(query.taskId, 'taskId'),
-    origin:
-      query.origin === undefined
-        ? undefined
-        : requiredEnum(query.origin, DOCUMENT_ORIGIN_VALUES, 'origin'),
     status:
       query.status === undefined
         ? undefined
         : requiredEnum(query.status, DOCUMENT_STATUS_VALUES, 'status'),
   };
+}
+
+export function validateDocumentId(id) {
+  if (!isValidUuid(id)) {
+    throw new BadRequestException('Invalid document id format');
+  }
+
+  return id;
 }
 
 function validateContext(context) {
@@ -269,28 +259,6 @@ function optionalEnum(value, allowedValues, field, defaultValue) {
   return requiredEnum(value, allowedValues, field);
 }
 
-function optionalPositiveInteger(value, field, defaultValue, maxValue) {
-  if (value === undefined) {
-    return defaultValue;
-  }
-
-  if (Array.isArray(value)) {
-    throw new BadRequestException(`${field} must be a positive integer`);
-  }
-
-  const numericValue = typeof value === 'number' ? value : Number(value);
-
-  if (!Number.isInteger(numericValue) || numericValue < 1) {
-    throw new BadRequestException(`${field} must be a positive integer`);
-  }
-
-  if (maxValue !== undefined && numericValue > maxValue) {
-    throw new BadRequestException(`${field} must be less than or equal to ${maxValue}`);
-  }
-
-  return numericValue;
-}
-
 function assertPlainObject(value, label) {
   if (!isPlainObject(value)) {
     throw new BadRequestException(`${label} must be an object`);
@@ -313,5 +281,11 @@ function isPlainObject(value) {
     typeof value === 'object' &&
     !Array.isArray(value) &&
     (prototype === Object.prototype || prototype === null)
+  );
+}
+
+function isValidUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    value,
   );
 }

@@ -19,29 +19,25 @@ export class PostgresDocumentsRepository {
           id,
           title,
           description,
-          origin,
           status,
           context,
           metadata,
           file_info,
           version,
-          created_at,
-          updated_at
+          created_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb, $9, $10, $11)
+        VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, $8, $9)
         RETURNING *
       `,
       [
         id,
         document.title,
         document.description || null,
-        document.origin,
         document.status,
         JSON.stringify(document.context || {}),
         JSON.stringify(document.metadata || {}),
         document.fileInfo === undefined ? null : JSON.stringify(document.fileInfo),
         document.version || 1,
-        now,
         now,
       ],
     );
@@ -50,14 +46,10 @@ export class PostgresDocumentsRepository {
   }
 
   async findAll(filters) {
-    const page = filters.page || 1;
-    const limit = filters.limit || 10;
-    const offset = (page - 1) * limit;
     const where = [];
     const params = [];
 
     addTextSearchFilter(where, params, filters.search);
-    addPlainFilter(where, params, 'origin', filters.origin);
     addPlainFilter(where, params, 'status', filters.status);
     addContextFilter(where, params, 'projectId', filters.projectId);
     addContextFilter(where, params, 'phaseId', filters.phaseId);
@@ -67,36 +59,22 @@ export class PostgresDocumentsRepository {
 
     const whereSql = where.length > 0 ? `WHERE ${where.join(' AND ')}` : '';
 
-    const countResult = await this.databaseService.query(
-      `SELECT COUNT(*)::int AS total FROM documents ${whereSql}`,
-      params,
-    );
-
-    const dataParams = [...params, limit, offset];
-    const limitParamIndex = dataParams.length - 1;
-    const offsetParamIndex = dataParams.length;
-
     const dataResult = await this.databaseService.query(
       `
         SELECT *
         FROM documents
         ${whereSql}
-        ORDER BY updated_at DESC
-        LIMIT $${limitParamIndex}
-        OFFSET $${offsetParamIndex}
+        ORDER BY COALESCE(updated_at, created_at) DESC
       `,
-      dataParams,
+      params,
     );
 
-    const total = countResult.rows[0].total;
+    const documents = dataResult.rows.map(mapDocumentRow);
 
     return {
-      data: dataResult.rows.map(mapDocumentRow),
+      data: documents,
       meta: {
-        page,
-        limit,
-        total,
-        totalPages: total === 0 ? 0 : Math.ceil(total / limit),
+        total: documents.length,
       },
     };
   }
@@ -124,6 +102,10 @@ export class PostgresDocumentsRepository {
 
     if (setClauses.length === 0) {
       return undefined;
+    }
+
+    if (changes.incrementVersion === true) {
+      setClauses.push('version = version + 1');
     }
 
     values.push(changes.updatedAt || new Date().toISOString());
@@ -204,14 +186,13 @@ function mapDocumentRow(row) {
     id: row.id,
     title: row.title,
     description: row.description || undefined,
-    origin: row.origin,
     status: row.status,
     context: row.context || {},
     metadata: row.metadata || {},
     fileInfo: row.file_info || undefined,
     version: row.version,
     createdAt: toIsoString(row.created_at),
-    updatedAt: toIsoString(row.updated_at),
+    updatedAt: row.updated_at ? toIsoString(row.updated_at) : null,
     archivedAt: row.archived_at ? toIsoString(row.archived_at) : undefined,
   };
 }

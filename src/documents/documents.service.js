@@ -1,9 +1,7 @@
 import { Dependencies, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  DOCUMENT_ORIGINS,
-  DOCUMENT_STATUSES,
-} from './models/document.constants';
+import { DOCUMENT_STATUSES } from './models/document.constants';
 import { PostgresDocumentsRepository } from './repositories/postgres-documents.repository';
+import { validateDocumentId } from './validators/document.validators';
 
 @Injectable()
 @Dependencies(PostgresDocumentsRepository)
@@ -16,7 +14,6 @@ export class DocumentsService {
     return this.documentsRepository.create({
       title: payload.title,
       description: payload.description,
-      origin: payload.origin || DOCUMENT_ORIGINS.MANUAL,
       status: payload.status || DOCUMENT_STATUSES.DRAFT,
       context: payload.context,
       metadata: payload.metadata || {},
@@ -30,6 +27,8 @@ export class DocumentsService {
   }
 
   async getDocumentById(id) {
+    validateDocumentId(id);
+
     const document = await this.documentsRepository.findById(id);
 
     if (!document) {
@@ -44,6 +43,7 @@ export class DocumentsService {
 
     const updatedDocument = await this.documentsRepository.update(id, {
       ...this.buildUpdateChanges(payload),
+      incrementVersion: true,
       updatedAt: new Date().toISOString(),
     });
 
