@@ -1,10 +1,13 @@
 import { NotFoundException } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
-import { DocumentOrigin, DocumentStatus } from './models/document.model';
+import {
+  DOCUMENT_ORIGINS,
+  DOCUMENT_STATUSES,
+} from './models/document.constants';
 import { InMemoryDocumentsRepository } from './repositories/in-memory-documents.repository';
 
 describe('DocumentsService', () => {
-  let service: DocumentsService;
+  let service;
 
   beforeEach(() => {
     service = new DocumentsService(new InMemoryDocumentsRepository());
@@ -12,34 +15,34 @@ describe('DocumentsService', () => {
 
   it('creates a manual document with defaults', async () => {
     const document = await service.createDocument({
-      title: 'Piano di progetto',
+      title: 'Project plan',
       context: {
         projectId: 'project-001',
       },
     });
 
     expect(document.id).toBeDefined();
-    expect(document.origin).toBe(DocumentOrigin.Manual);
-    expect(document.status).toBe(DocumentStatus.Draft);
+    expect(document.origin).toBe(DOCUMENT_ORIGINS.MANUAL);
+    expect(document.status).toBe(DOCUMENT_STATUSES.DRAFT);
     expect(document.metadata).toEqual({});
     expect(document.version).toBe(1);
   });
 
   it('lists documents with filters', async () => {
     await service.createDocument({
-      title: 'Piano di progetto',
-      description: 'Documento iniziale',
-      origin: DocumentOrigin.Manual,
-      status: DocumentStatus.Draft,
+      title: 'Project plan',
+      description: 'Initial document',
+      origin: DOCUMENT_ORIGINS.MANUAL,
+      status: DOCUMENT_STATUSES.DRAFT,
       context: {
         projectId: 'project-001',
-        phaseId: 'phase-analisi',
+        phaseId: 'phase-analysis',
       },
     });
     await service.createDocument({
-      title: 'Verbale riunione',
-      origin: DocumentOrigin.Manual,
-      status: DocumentStatus.Approved,
+      title: 'Meeting notes',
+      origin: DOCUMENT_ORIGINS.MANUAL,
+      status: DOCUMENT_STATUSES.APPROVED,
       context: {
         projectId: 'project-002',
       },
@@ -49,12 +52,12 @@ describe('DocumentsService', () => {
       page: 1,
       limit: 10,
       projectId: 'project-001',
-      status: DocumentStatus.Draft,
-      search: 'piano',
+      status: DOCUMENT_STATUSES.DRAFT,
+      search: 'plan',
     });
 
     expect(result.meta.total).toBe(1);
-    expect(result.data[0].title).toBe('Piano di progetto');
+    expect(result.data[0].title).toBe('Project plan');
   });
 
   it('throws NotFoundException when a document does not exist', async () => {
@@ -65,29 +68,45 @@ describe('DocumentsService', () => {
 
   it('updates a document without incrementing version', async () => {
     const document = await service.createDocument({
-      title: 'Piano di progetto',
+      title: 'Project plan',
       context: {
         projectId: 'project-001',
       },
     });
 
     const updated = await service.updateDocument(document.id, {
-      title: 'Piano di progetto aggiornato',
-      status: DocumentStatus.InReview,
+      title: 'Updated project plan',
+      status: DOCUMENT_STATUSES.IN_REVIEW,
       metadata: {
         reviewRequired: true,
       },
     });
 
-    expect(updated.title).toBe('Piano di progetto aggiornato');
-    expect(updated.status).toBe(DocumentStatus.InReview);
+    expect(updated.title).toBe('Updated project plan');
+    expect(updated.status).toBe(DOCUMENT_STATUSES.IN_REVIEW);
     expect(updated.metadata).toEqual({ reviewRequired: true });
     expect(updated.version).toBe(1);
   });
 
+  it('does not allow PATCH to change origin', async () => {
+    const document = await service.createDocument({
+      title: 'Project plan',
+      context: {
+        projectId: 'project-001',
+      },
+    });
+
+    const updated = await service.updateDocument(document.id, {
+      origin: DOCUMENT_ORIGINS.GENERATED,
+      title: 'Updated project plan',
+    });
+
+    expect(updated.origin).toBe(DOCUMENT_ORIGINS.MANUAL);
+  });
+
   it('archives a document logically', async () => {
     const document = await service.createDocument({
-      title: 'Piano di progetto',
+      title: 'Project plan',
       context: {
         projectId: 'project-001',
       },
@@ -95,14 +114,14 @@ describe('DocumentsService', () => {
 
     const archived = await service.archiveDocument(document.id);
 
-    expect(archived.status).toBe(DocumentStatus.Archived);
+    expect(archived.status).toBe(DOCUMENT_STATUSES.ARCHIVED);
     expect(archived.archivedAt).toBeDefined();
   });
 
   it('creates a new generated document from intake', async () => {
     const document = await service.intakeGeneratedDocument({
-      title: 'Report avanzamento generato',
-      description: 'Documento generato dal servizio esterno',
+      title: 'Generated progress report',
+      description: 'Document created by an external service',
       externalReference: 'generator-run-001',
       context: {
         projectId: 'project-001',
@@ -112,7 +131,7 @@ describe('DocumentsService', () => {
       },
     });
 
-    expect(document.origin).toBe(DocumentOrigin.Generated);
+    expect(document.origin).toBe(DOCUMENT_ORIGINS.GENERATED);
     expect(document.version).toBe(1);
     expect(document.metadata).toEqual({
       generatedBy: 'external-generator',
@@ -122,7 +141,7 @@ describe('DocumentsService', () => {
 
   it('updates an existing document from intake and increments version', async () => {
     const document = await service.createDocument({
-      title: 'Report avanzamento',
+      title: 'Progress report',
       context: {
         projectId: 'project-001',
       },
@@ -133,22 +152,22 @@ describe('DocumentsService', () => {
 
     const updated = await service.intakeGeneratedDocument({
       targetDocumentId: document.id,
-      title: 'Report avanzamento generato - revisione',
-      description: 'Nuova versione simulata',
+      title: 'Generated progress report - revision',
+      description: 'Simulated new version',
       externalReference: 'generator-run-002',
       context: {
         projectId: 'project-001',
-        phaseId: 'phase-esecuzione',
+        phaseId: 'phase-execution',
       },
       metadata: {
-        revisionReason: 'Aggiornamento dati progetto',
+        revisionReason: 'Updated project data',
       },
     });
 
-    expect(updated.origin).toBe(DocumentOrigin.Generated);
+    expect(updated.origin).toBe(DOCUMENT_ORIGINS.GENERATED);
     expect(updated.version).toBe(2);
     expect(updated.metadata).toEqual({
-      revisionReason: 'Aggiornamento dati progetto',
+      revisionReason: 'Updated project data',
       externalReference: 'generator-run-002',
     });
   });
